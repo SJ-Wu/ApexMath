@@ -7,6 +7,11 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
+# Vite 環境變數（build time 替換 import.meta.env.*）
+# Render 部署時透過 render.yaml 的 envVars 或 docker build --build-arg 傳入
+ARG VITE_API_BASE_URL=/api
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
+
 # 複製原始碼並建構
 COPY . .
 RUN npm run build
@@ -24,3 +29,4 @@ EXPOSE 80
 
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
     CMD wget -q --spider http://localhost/ || exit 1
+
