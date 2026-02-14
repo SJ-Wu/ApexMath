@@ -1,0 +1,36 @@
+# Render Blueprint — 定義 ApexMath 所有服務
+# 文件: https://docs.render.com/blueprint-spec
+#
+# 部署方式:
+#   1. 將此 repo 連接到 Render Dashboard
+#   2. Render 會自動偵測 render.yaml 並建立所有服務
+#   3. 或至 https://dashboard.render.com/select-repo?type=blueprint 手動建立
+
+services:
+  # ── FastAPI 後端 ──
+  - type: web
+    name: apexmath-api
+    runtime: docker
+    dockerfilePath: ./api/Dockerfile
+    dockerContext: ./api
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false  # 需在 Render Dashboard 手動設定
+      - key: CORS_ORIGINS
+        value: https://apexmath-web.onrender.com
+        # ↑ 部署後請改為實際的前端 URL
+
+  # ── Vue 前端（Nginx） ──
+  - type: web
+    name: apexmath-web
+    runtime: docker
+    dockerfilePath: ./web/Dockerfile
+    dockerContext: ./web
+    plan: free
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://apexmath-api.onrender.com/api
+        # ↑ 部署後請改為實際的 API URL
+
