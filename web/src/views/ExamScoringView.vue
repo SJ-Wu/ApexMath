@@ -66,7 +66,7 @@ async function handleSubmit() {
   try {
     const result = await submitAssessmentWithAnalysis(examId, payload)
     // 將評估結果透過 router state 傳遞至結果報告頁
-    router.push({ name: 'result-report', state: { assessmentResult: JSON.stringify(result) } })
+    await router.push({name: 'result-report', state: {assessmentResult: JSON.stringify(result)}})
   } catch (e) {
     const status = e.response?.status
     if (status === 503) {
