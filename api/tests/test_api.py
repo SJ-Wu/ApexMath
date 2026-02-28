@@ -1,11 +1,12 @@
 import pytest
 from httpx import AsyncClient, ASGITransport
 
-from main import app
+from tests.conftest import create_test_app
 
 
 @pytest.fixture()
 def client():
+    app = create_test_app()
     transport = ASGITransport(app=app)
     return AsyncClient(transport=transport, base_url="http://test")
 

@@ -1,10 +1,5 @@
 # Render Blueprint — 定義 ApexMath 所有服務
 # 文件: https://docs.render.com/blueprint-spec
-#
-# 部署方式:
-#   1. 將此 repo 連接到 Render Dashboard
-#   2. Render 會自動偵測 render.yaml 並建立所有服務
-#   3. 或至 https://dashboard.render.com/select-repo?type=blueprint 手動建立
 
 services:
   # ── FastAPI 後端 ──
@@ -16,11 +11,22 @@ services:
     plan: free
     healthCheckPath: /
     envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: apexmath-db
+          property: connectionString
+        # asyncpg 需要 postgresql+asyncpg:// 前綴，Render 提供 postgres://
+        # 在 app/core/config.py 中處理轉換
       - key: OPENAI_API_KEY
         sync: false  # 需在 Render Dashboard 手動設定
+      - key: JWT_SECRET_KEY
+        generateValue: true
       - key: CORS_ORIGINS
         value: https://apexmath-web.onrender.com
-        # ↑ 部署後請改為實際的前端 URL
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PASSWORD
+        sync: false
 
   # ── Vue 前端（Nginx） ──
   - type: web
@@ -29,14 +35,15 @@ services:
     dockerfilePath: ./web/Dockerfile
     dockerContext: ./web
     plan: free
-    # Render 會自動將 envVars 傳入 Docker build ARG
-    # VITE_API_BASE_URL 在 Dockerfile 的 build stage 會被 Vite 編譯進 JS
     envVars:
       - key: VITE_API_BASE_URL
-        # 使用 fromService 自動取得 API 服務的外部 URL
         fromService:
           name: apexmath-api
           type: web
           envVarKey: RENDER_EXTERNAL_URL
-        # Render 會產出類似 https://apexmath-api.onrender.com
-        # 前端 axios 會在此 base URL 後加上 /exams 等路徑
+
+databases:
+  - name: apexmath-db
+    plan: free
+    databaseName: apexmath
+    user: apexmath

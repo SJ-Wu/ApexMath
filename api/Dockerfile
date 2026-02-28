@@ -15,6 +15,7 @@ WORKDIR /app
 # 複製已安裝的套件
 COPY --from=builder /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
 COPY --from=builder /usr/local/bin/uvicorn /usr/local/bin/uvicorn
+COPY --from=builder /usr/local/bin/alembic /usr/local/bin/alembic
 
 # 複製應用程式原始碼
 COPY . .
